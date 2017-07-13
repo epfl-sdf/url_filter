@@ -1,0 +1,17 @@
+.coloredBox {
+  background-color: #ae0010;
+  color: white;
+}
+h3 {
+  color: white;
+  font-weight: bold;
+  letter-spacing: px;
+}
+
+ul{
+  list-style: none;
+}
+
+strong{
+  color: white;
+}

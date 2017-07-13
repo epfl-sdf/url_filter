@@ -1,5 +1,6 @@
 import collections
 import re
+import os, errno
 
 from bs4 import BeautifulSoup
 
@@ -9,9 +10,29 @@ SECTIONS_TO_REMOVE = ['recent-comments-2', 'archives-2', 'categories-2', 'meta-2
 class Filter:
     def response(self, flow):
         url = flow.request.url
+
+        if 'coloredBox.css' in url:
+            print("URL coloredBox")
+            coloredBox = ""
+            # Teste si le fichier existe
+            try:
+                f = open("/home/GIT/url_filter/css/coloredBox.css", "r")
+                coloredBox = f.read()
+            except IOError as ioex:
+                print("No coloredBox.css file found")
+            
+            flow.response.content = str(BeautifulSoup(coloredBox)).encode("utf-8");
+            flow.response.code = 200
+
         # Modifier le html pour filtrer les bugs
         if url[-1] == '/' or url[-5:] == '.html' or url[-4:] == '.jsp':
             html = BeautifulSoup(flow.response.content, 'html.parser')
+            # Ajout du link coloredBox.css dans entête html
+            if url[-4:] != '.jsp':
+                head = html.head
+                new_link = html.new_tag("link", href="coloredBox.css", id="coloredBox.css", media="all", rel="stylesheet", type="text/css")
+                head.append(new_link)
+
             # Modifications apportées aux nouvelles versions du site
             if TEST_URL in url and html is not None:
                 # Enlever la barre additionelle inutile des réseaux sociaux
