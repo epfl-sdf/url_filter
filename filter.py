@@ -11,27 +11,37 @@ class Filter:
     def response(self, flow):
         url = flow.request.url
 
-        if 'coloredBox.css' in url:
-            print("URL coloredBox")
-            coloredBox = ""
-            # Teste si le fichier existe
-            try:
-                f = open("/home/GIT/url_filter/css/coloredBox.css", "r")
-                coloredBox = f.read()
-            except IOError as ioex:
-                print("No coloredBox.css file found")
-            
-            flow.response.content = str(BeautifulSoup(coloredBox)).encode("utf-8");
-            flow.response.code = 200
-
         # Modifier le html pour filtrer les bugs
         if url[-1] == '/' or url[-5:] == '.html' or url[-4:] == '.jsp':
             html = BeautifulSoup(flow.response.content, 'html.parser')
             # Ajout du link coloredBox.css dans entête html
             if url[-4:] != '.jsp':
+                coloredBox = ''
+                # Essaye d'ouvrir le fichier de style css
+                try:
+                    f = open('css/coloredBox.css', 'r')
+                    print('Opened')
+                    coloredBox = f.read()
+                except IOError as ioex:
+                    print('No coloredBox.css file found')
+
                 head = html.head
-                new_link = html.new_tag("link", href="coloredBox.css", id="coloredBox.css", media="all", rel="stylesheet", type="text/css")
+                new_link = html.new_tag('style')
+                new_link.append(coloredBox)
                 head.append(new_link)
+
+                # Modifier la classe de la section pour qu'elle soit coloredBox
+                for section in html.findAll('section', {'id' : 'black-studio-tinymce-1'}):
+                    section['class'] = 'coloredBox'
+                    for h3 in section.findAll('h3'):
+                        h3['class'] = 'coloredBox'
+                    
+                    for div in section.findAll('div'):
+                        div['class'] = 'coloredBox'
+                        for ul in div.findAll('ul'):
+                         ul['class'] = 'coloredBox'
+                        for strong in div.findAll('strong'):
+                            strong['class'] = 'coloredBox'
 
             # Modifications apportées aux nouvelles versions du site
             if TEST_URL in url and html is not None:

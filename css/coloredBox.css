@@ -1,17 +1,17 @@
 .coloredBox {
-  background-color: #ae0010;
-  color: white;
+  background-color: #ae0010 !important;
+  color: white !important;
 }
-h3 {
-  color: white;
-  font-weight: bold;
-  letter-spacing: px;
-}
-
-ul{
-  list-style: none;
+h3.coloredBox {
+  color: white !important;
+  font-weight: bold !important;
+  letter-spacing: 1px !important;
 }
 
-strong{
-  color: white;
+ul.coloredBox {
+  list-style: none !important;
+}
+
+strong.coloredBox {
+  color: white !important;
 }
