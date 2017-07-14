@@ -7,6 +7,11 @@ from bs4 import BeautifulSoup
 TEST_URL = 'test-web-wordpress.epfl.ch'
 SECTIONS_TO_REMOVE = ['recent-comments-2', 'archives-2', 'categories-2', 'meta-2', 'search-2']
 
+
+
+   
+
+
 class Filter:
     def response(self, flow):
         url = flow.request.url
@@ -30,18 +35,8 @@ class Filter:
                 new_link.append(coloredBox)
                 head.append(new_link)
 
-                # Modifier la classe de la section pour qu'elle soit coloredBox
-                for section in html.findAll('section', {'id' : 'black-studio-tinymce-1'}):
-                    section['class'] = 'coloredBox'
-                    for h3 in section.findAll('h3'):
-                        h3['class'] = 'coloredBox'
-                    
-                    for div in section.findAll('div'):
-                        div['class'] = 'coloredBox'
-                        for ul in div.findAll('ul'):
-                         ul['class'] = 'coloredBox'
-                        for strong in div.findAll('strong'):
-                            strong['class'] = 'coloredBox'
+                Filter.change_to_coloredBox(html, 'black-studio-tinymce-1')
+                Filter.change_to_coloredBox(html, 'black-studio-tinymce-2')
 
             # Modifications apportées aux nouvelles versions du site
             if TEST_URL in url and html is not None:
@@ -94,6 +89,23 @@ class Filter:
                 if not ((css_mod[pos+1:pos+2] == css_mod[pos+3:pos+4]) and (css_mod[pos+3:pos+4] == css_mod[pos+5:pos+6])):
                     css_mod = css_mod[:pos] + "#ae0010" + css_mod[pos + 7:]
             flow.response.text = css_mod
+
+
+    def change_to_coloredBox(html, id): 
+       # Modifier la classe de la section pour qu'elle soit coloredBox
+        for section in html.findAll('section', {'id' : id}):
+           section['class'] = 'coloredBox'
+           for h3 in section.findAll('h3'):
+               h3['class'] = 'coloredBox'
+           
+           for div in section.findAll('div'):
+               div['class'] = 'coloredBox'
+               for ul in div.findAll('ul'):
+                ul['class'] = 'coloredBox'
+               for strong in div.findAll('strong'):
+                   strong['class'] = 'coloredBox'
+
+
 
 def start():
     return Filter()

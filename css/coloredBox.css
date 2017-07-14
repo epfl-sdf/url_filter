@@ -1,6 +1,7 @@
-.coloredBox {
+section.coloredBox {
   background-color: #ae0010 !important;
   color: white !important;
+  margin-bottom: 44px;
 }
 h3.coloredBox {
   color: white !important;
