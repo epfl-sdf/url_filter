@@ -24,51 +24,52 @@ class Filter:
         if isText or url[-4:] == '.jsp':
             html = BeautifulSoup(flow.response.content, 'html.parser')
 
-            if not TEST_URL in url and html:
-                self.remove_right_panel_color(html)
+            # Seulement appliquer des changemants visuels aux sites de du domaine de l'EPFL
+            if ORIG_URL in flow.request.host:
+                if not TEST_URL in url and html:
+                    self.remove_right_panel_color(html)
 
-            # Modifications apportées aux nouvelles versions du site
-            if TEST_URL in url and html:
+                # Modifications apportées aux nouvelles versions du site
+                if TEST_URL in url and html:
 
+                    # Enlever la barre additionelle inutile des réseaux sociaux
+                    for div in html.findAll('div', {'class' : 'addtoany_share_save_container addtoany_content_top'}):
+                        div.extract()
+                    
+                    # Retrier les elements dans la barre de droite
+                    aside = html.find('aside' , {'id' : 'secondary'})
+                    toSort = {}
+                    if aside is not None:
+                        for section in aside.findAll('section'):
+                            sectionId = section['id']
+                            if sectionId[:-2] == 'black-studio-tinymce':
+                                toSort[sectionId] = section.extract()
+                        sortedSections = list(map(lambda x : x[1], sorted(toSort.items())))
+                        for section in sortedSections:
+                            aside.append(section)
 
-                # Enlever la barre additionelle inutile des réseaux sociaux
-                for div in html.findAll('div', {'class' : 'addtoany_share_save_container addtoany_content_top'}):
-                    div.extract()
-                
-                # Retrier les elements dans la barre de droite
-                aside = html.find('aside' , {'id' : 'secondary'})
-                toSort = {}
-                if aside is not None:
-                    for section in aside.findAll('section'):
-                        sectionId = section['id']
-                        if sectionId[:-2] == 'black-studio-tinymce':
-                            toSort[sectionId] = section.extract()
-                    sortedSections = list(map(lambda x : x[1], sorted(toSort.items())))
-                    for section in sortedSections:
-                        aside.append(section)
+                    # Enlever la barre de droite de Wordpress
+                    for section in html.findAll('section'):
+                        if section.get('id') in SECTIONS_TO_REMOVE:
+                            section.extract()
 
-                # Enlever la barre de droite de Wordpress
-                for section in html.findAll('section'):
-                    if section.get('id') in SECTIONS_TO_REMOVE:
-                        section.extract()
+                    # Supprimer le footer du site
+                    for footer in html.findAll('footer', {'id' : 'colophon'}):
+                        footer.extract()
 
-                # Supprimer le footer du site
-                for footer in html.findAll('footer', {'id' : 'colophon'}):
-                    footer.extract()
+                    # Supprimer la barre d'admin
+                    for div in html.findAll('div', {'id' : 'wpadminbar'}):
+                        div.extract()
 
-                # Supprimer la barre d'admin
-                for div in html.findAll('div', {'id' : 'wpadminbar'}):
-                    div.extract()
+                    # Supprimer la marge du haut pour le corps du site causé par la barre d'admin
+                    for style in html.findAll('style', {'media' : 'screen'}):
+                        style.extract()
 
-                # Supprimer la marge du haut pour le corps du site causé par la barre d'admin
-                for style in html.findAll('style', {'media' : 'screen'}):
-                    style.extract()
-
-            # Modifications apportées aux sites originaux
-            else:
-                # Supprimer le footer du site
-                for div in html.findAll('div', {'id' : 'footer'}):
-                    div.extract()
+                # Modifications apportées aux sites originaux
+                else:
+                    # Supprimer le footer du site
+                    for div in html.findAll('div', {'id' : 'footer'}):
+                        div.extract()
 
             # Mettre la version du proxy en haut de la page
             if html.body is not None and html.head is not None:
@@ -89,7 +90,7 @@ class Filter:
         # Modifier le .css pour enlever le mode résponsif
         parts = url.split('/')
         fileName = parts[-1].strip('/')
-        if '.css' in fileName:
+        if ORIG_URL in flow.request.host and '.css' in fileName:
             css_mod = re.sub('@media screen and \( ?min-width: ?\d+[.]?\d*', '@media screen and (min-width: 1', flow.response.text)
             css_mod = re.sub('@media screen and \( ?max-width: ?\d+[.]?\d*', '@media screen and (max-width: 1', css_mod)
             css_mod = re.sub('@media screen and \( ?min-width: ?\d+[.]?\d*[a-z]* ?\) and \( ?max-width: ?\d+[.]?[a-z]* ?\)', '@media screen and (min-width: 1em) and (max-width: 1em)', css_mod) 
