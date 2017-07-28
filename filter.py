@@ -6,6 +6,7 @@ import csv
 
 from bs4 import BeautifulSoup
 from version import __version__
+from urllib.parse import urlparse
 
 ORIG_URL = 'epfl.ch'
 TEST_URL = 'test-web-wordpress.epfl.ch'
@@ -14,6 +15,8 @@ WP_URL = '-web-wordpress.epfl.ch' + '/' + V_TEST_URL
 DEV_URL = 'dev-web-wordpress.epfl.ch'
 SECTIONS_TO_REMOVE = ['recent-comments-2', 'archives-2', 'categories-2', 'meta-2', 'search-2']
 LOGIN = 'wp-login.php'
+
+TARGET_URLS = ['*epfl.ch', '*wordpress*']
 
 COOKIE_FOLDER = 'data/cookies'
 CREDENTIALS_FILE = '../credentials/credentials.csv'
@@ -66,28 +69,23 @@ class Filter:
             Filter.downloadCookie(url, name, cookieFoldPath, credFilePath)
         return cookie
     
-    #def request(self, flow):
-        #url = flow.request.url
-        # Regarde si bien sur wordpress
-        #if WP_URL in url:
-        #    name = url.rsplit(WP_URL + '/', 1)[1]
-        #    name = name.split('/')[0]
-        #    # Regarde si le cookie existe et si oui le prend
-        #    cookie = Filter.getCookie(url, name, COOKIE_FOLDER, CREDENTIALS_FILE)
-        #    if cookie:
-        #        cookie = cookie.splitlines()[-2:]
-        #        part1 = cookie[0].split('\t')[-2:]
-        #        part2 = cookie[1].split('\t')[-2:]
-        #        cookie =    (part1[0] + '=' + part1[1] + '; ' +
-        #                                            part2[0] + '=' + part2[1])
-        #        cookie = str.encode(cookie)
-        #        nCookie = str.encode('Cookie')
-        #        flow.request.headers.set_all('Cookie', (nCookie,cookie))
-        #    print('\n\n' + str(flow.request.headers) + '\n\n')
+    # Teste si l'url passé en paramètre doit être filtré 
+    def isInTargetUrls(url):
+        netloc = urlparse(url).netloc
+        for targetUrl in TARGET_URLS:
+            tUrl = targetUrl.replace('.', '\.').replace('*', '.*')
+            if re.match(tUrl, netloc):
+                return True 
+        return False
 
-
+    
     def response(self, flow):
         url = flow.request.url
+
+        # Si l'url n'est PAS à filtrer => quitte la fonction
+        if not Filter.isInTargetUrls(url):
+            return
+
         # Modifier le html pour filtrer les bugs
         isText = False
         for header in flow.response.headers.items():
