@@ -76,8 +76,7 @@ class Filter:
             if re.match(tUrl, netloc):
                 return (True, targetUrl )
         return (False, "")
-
-    
+   
     def response(self, flow):
         url = flow.request.url
 
