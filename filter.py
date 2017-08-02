@@ -9,14 +9,12 @@ from version import __version__
 from urllib.parse import urlparse
 
 ORIG_URL = 'epfl.ch'
-TEST_URL = 'test-web-wordpress.epfl.ch'
-V_TEST_URL = 'v1-testwp'
-WP_URL = '-web-wordpress.epfl.ch' + '/' + V_TEST_URL
 DEV_URL = 'dev-web-wordpress.epfl.ch'
 SECTIONS_TO_REMOVE = ['recent-comments-2', 'archives-2', 'categories-2', 'meta-2', 'search-2']
 LOGIN = 'wp-login.php'
 
-TARGET_URLS = ['*epfl.ch', '*wordpress*']
+TARGET_URLS = ['*epfl.ch', '*wordpress*ch', 'localhost*', '0.0.0.0*']
+WP_URLS = ['*web-wordpress.epfl.ch']
 
 COOKIE_FOLDER = 'data/cookies'
 CREDENTIALS_FILE = '../credentials/credentials.csv'
@@ -70,21 +68,26 @@ class Filter:
         return cookie
     
     # Teste si l'url passé en paramètre doit être filtré 
-    def isInTargetUrls(url):
+    def isInUrlList(url, urlList):
         netloc = urlparse(url).netloc
-        for targetUrl in TARGET_URLS:
+        print(netloc)
+        for targetUrl in urlList:
             tUrl = targetUrl.replace('.', '\.').replace('*', '.*')
             if re.match(tUrl, netloc):
-                return True 
-        return False
+                return (True, targetUrl )
+        return (False, "")
 
     
     def response(self, flow):
         url = flow.request.url
 
         # Si l'url n'est PAS à filtrer => quitte la fonction
-        if not Filter.isInTargetUrls(url):
+        if not Filter.isInUrlList(url, TARGET_URLS)[0]:
             return
+
+        # Si l'url est un url wordpress
+        isWpUrl, wpUrl = Filter.isInUrlList(url, WP_URLS)
+        wpUrl = wpUrl.replace('*', '')
 
         # Modifier le html pour filtrer les bugs
         isText = False
@@ -97,11 +100,10 @@ class Filter:
         if isText or url[-4:] == '.jsp':
             html = BeautifulSoup(flow.response.content, 'html.parser')
             # Fill the website with credentials
-            if WP_URL in url:
-                name = url.rsplit(WP_URL + '/', 1)[1]
-                name = name.split('/')[0]
+            if isWpUrl:
+                name = url.rsplit(wpUrl + '/', 1)[1]
+                name = name.split('/')[1]
                 log, pwd =  Filter.getCredentials(name, CREDENTIALS_FILE)
-                print((log, pwd))
                 for inputTag in html.findAll('input'):
                     if inputTag and inputTag.has_attr('id'):
                         if inputTag['id'] == 'user_login':
@@ -109,11 +111,12 @@ class Filter:
                         if inputTag['id'] == 'user_pass':
                             inputTag['value'] = pwd
 
-            if not (TEST_URL in url and html) and not (DEV_URL in url and html):
+            # Si ce n'est le site WP => c'est l'EPFL
+            if not isWpUrl:
                 self.remove_right_panel_color(html)
 
             # Modifications apportées aux nouvelles versions du site
-            if (TEST_URL in url and html) or (DEV_URL in url and html):
+            if isWpUrl:
 
                 # Enlever la barre additionelle inutile des réseaux sociaux
                 for div in html.findAll('div', {'class' : 'addtoany_share_save_container addtoany_content_top'}):
