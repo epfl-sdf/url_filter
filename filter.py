@@ -185,7 +185,7 @@ class Filter:
                               } else { \
                                 just_scrolled = true; \
                                 window.parent.postMessage(window.scrollY, "*"); \
-                                setTimeout(reset_scroll, 50); \
+                                setTimeout(reset_scroll, 400); \
                               }};')
                 html.body.insert(0, script)
             # Mettre les changements dans la réponse
