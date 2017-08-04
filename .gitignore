@@ -104,4 +104,6 @@ ENV/
 # Cookies
 data/cookies/*
 data/credentials/*
+# Virtualenv
+venvURL/*
 

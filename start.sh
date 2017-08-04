@@ -1,5 +1,7 @@
 #!/bin/bash
 
+virtFold="venvURL"
+
 # Teste si les arguments sont bien passés 
 if (( $# < 2 ))
 then
@@ -37,8 +39,12 @@ then
     kill -9 $PID
 fi
 echo "Arrêt de " $CMD_NAME
+deactivate
 exit
 }
+
+# lance le virtualenv
+source $virtFold/bin/activate 
 
 trap finish INT
 
@@ -71,4 +77,3 @@ fi
 sleep 2
 done
 done
-
