@@ -13,7 +13,7 @@ DEV_URL = 'dev-web-wordpress.epfl.ch'
 SECTIONS_TO_REMOVE = ['recent-comments-2', 'archives-2', 'categories-2', 'meta-2', 'search-2']
 LOGIN = 'wp-login.php'
 
-TARGET_URLS = ['*epfl.ch', '*wordpress*ch', 'localhost*', '0.0.0.0*']
+TARGET_URLS = ['10.92.104.*', '*epfl.ch', '*wordpress*ch', 'localhost*', '0.0.0.0*']
 WP_URLS = ['*web-wordpress.epfl.ch']
 
 COOKIE_FOLDER = 'data/cookies'
@@ -23,7 +23,6 @@ class Filter:
 
     # Récupère le username et le mot de passe pour le site
     def getCredentials(name, credFilePath):
-        print(name)
         log = pwd = ''
         try:
             f = open(credFilePath)
@@ -35,6 +34,7 @@ class Filter:
             f.close()
         except IOError as ioex:
             print ('No credentials')
+        print(log,pwd)
         return (log, pwd)
 
     # Télécharge le cookie pour s'identifier
