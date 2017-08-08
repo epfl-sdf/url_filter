@@ -28,9 +28,9 @@ class Filter:
             f = open(credFilePath)
             reader = csv.reader(f)
             for row in reader:
-                if row[4] == name:
-                    log = row[6]
-                    pwd = row[7]
+                if row[3] == name:
+                    log = row[5]
+                    pwd = row[6]
             f.close()
         except IOError as ioex:
             print ('No credentials')
