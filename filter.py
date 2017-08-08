@@ -6,14 +6,15 @@ import csv
 
 from bs4 import BeautifulSoup
 from version import __version__
+from urllib.parse import urlparse
 
 ORIG_URL = 'epfl.ch'
-TEST_URL = 'test-web-wordpress.epfl.ch'
-V_TEST_URL = 'v1-testwp'
-WP_URL = '-web-wordpress.epfl.ch' + '/' + V_TEST_URL
 DEV_URL = 'dev-web-wordpress.epfl.ch'
 SECTIONS_TO_REMOVE = ['recent-comments-2', 'archives-2', 'categories-2', 'meta-2', 'search-2']
 LOGIN = 'wp-login.php'
+
+TARGET_URLS = ['10.92.104.*', '*epfl.ch', '*wordpress*ch', 'localhost*', '0.0.0.0*']
+WP_URLS = ['*web-wordpress.epfl.ch']
 
 COOKIE_FOLDER = 'data/cookies'
 CREDENTIALS_FILE = '../credentials/credentials.csv'
@@ -24,7 +25,6 @@ class Filter:
 
     # Récupère le username et le mot de passe pour le site
     def getCredentials(name, credFilePath):
-        print(name)
         log = pwd = ''
         try:
             f = open(credFilePath)
@@ -36,6 +36,7 @@ class Filter:
             f.close()
         except IOError as ioex:
             print ('No credentials')
+        print(log,pwd)
         return (log, pwd)
 
     # Télécharge le cookie pour s'identifier
@@ -68,8 +69,27 @@ class Filter:
             Filter.downloadCookie(url, name, cookieFoldPath, credFilePath)
         return cookie
     
+    # Teste si l'url passé en paramètre doit être filtré 
+    def isInUrlList(url, urlList):
+        netloc = urlparse(url).netloc
+        print(netloc)
+        for targetUrl in urlList:
+            tUrl = targetUrl.replace('.', '\.').replace('*', '.*')
+            if re.match(tUrl, netloc):
+                return (True, targetUrl )
+        return (False, "")
+   
     def response(self, flow):
         url = flow.request.url
+
+        # Si l'url n'est PAS à filtrer => quitte la fonction
+        if not Filter.isInUrlList(url, TARGET_URLS)[0]:
+            return
+
+        # Si l'url est un url wordpress
+        isWpUrl, wpUrl = Filter.isInUrlList(url, WP_URLS)
+        wpUrl = wpUrl.replace('*', '')
+
         # Modifier le html pour filtrer les bugs
         isText = False
         for header in flow.response.headers.items():
@@ -81,11 +101,10 @@ class Filter:
         if isText or url[-4:] == '.jsp':
             html = BeautifulSoup(flow.response.content, 'html.parser')
             # Fill the website with credentials
-            if WP_URL in url:
-                name = url.rsplit(WP_URL + '/', 1)[1]
-                name = name.split('/')[0]
+            if isWpUrl:
+                name = url.rsplit(wpUrl + '/', 1)[1]
+                name = name.split('/')[1]
                 log, pwd =  Filter.getCredentials(name, CREDENTIALS_FILE)
-                print((log, pwd))
                 for inputTag in html.findAll('input'):
                     if inputTag and inputTag.has_attr('id'):
                         if inputTag['id'] == 'user_login':
@@ -93,11 +112,12 @@ class Filter:
                         if inputTag['id'] == 'user_pass':
                             inputTag['value'] = pwd
 
-            if not (TEST_URL in url and html) and not (DEV_URL in url and html):
+            # Si ce n'est le site WP => c'est l'EPFL
+            if not isWpUrl:
                 self.remove_right_panel_color(html)
 
             # Modifications apportées aux nouvelles versions du site
-            if (TEST_URL in url and html) or (DEV_URL in url and html):
+            if isWpUrl:
 
                 # Enlever la barre additionelle inutile des réseaux sociaux
                 for div in html.findAll('div', {'class' : 'addtoany_share_save_container addtoany_content_top'}):
@@ -138,22 +158,11 @@ class Filter:
                 for div in html.findAll('div', {'id' : 'footer'}):
                     div.extract()
 
-            # Mettre la version du proxy en haut de la page
-            # 
-            #     versionBar = html.new_tag('div', id='version-bar')
-            #     versionHeader = html.new_tag('p1', id='version-header')
-            #     versionHeader.append("Ver: " + __version__)
-            #     versionLink = html.new_tag('a', id='version-link', href=flow.request.url)
-            #     versionLink.append(flow.request.url)
-            #     versionHeader.append(versionLink)
-            #     versionStyle = html.new_tag('style')
-            #     versionStyle.append('#version-bar{background-color: #555555; position:sticky; top:1px; z-index:1000000}\n#version-header, #version-link {padding-top : 0px; font-weight : 500; font-family : Arial; font-size : 15px; color : #ffffff}\n#version-link {padding-left : 1em}')
-            #     html.head.append(versionStyle)
-            #     versionBar.append(versionHeader)
-            #     html.body.insert(0, versionBar)
+            
             if html.body is not None and html.head is not None:
 
                 script = html.new_tag('script')
+
                 with open(SCRIPT_PATH+"autolog.js", 'r') as myfile:
                     script.append(myfile.read());
 
@@ -176,6 +185,7 @@ class Filter:
                 
                 
                 
+
             # Mettre les changements dans la réponse
             flow.response.content = str(html).encode('utf-8')
 
