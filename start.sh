@@ -46,6 +46,8 @@ exit
 # lance le virtualenv
 source $virtFold/bin/activate 
 
+export PYTHONPATH=../credentials/:$PYTHONPATH
+
 trap finish INT
 
 while [ 1 ];

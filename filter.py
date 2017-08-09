@@ -8,6 +8,8 @@ from bs4 import BeautifulSoup
 from version import __version__
 from urllib.parse import urlparse
 
+from distrib_credentials import api_key
+
 ORIG_URL = 'epfl.ch'
 DEV_URL = 'dev-web-wordpress.epfl.ch'
 SECTIONS_TO_REMOVE = ['recent-comments-2', 'archives-2', 'categories-2', 'meta-2', 'search-2']
@@ -173,6 +175,22 @@ class Filter:
                 script = html.new_tag('script')
                 script.append('setTimeout(function () {document.getElementById("wp-submit").click();}, 500);')
                 html.body.insert(0,script)
+
+                script = html.new_tag('script')
+                script['type'] = 'text/javascript'
+                script.append("(function() { \
+                                    var s = document.createElement('script'); \
+                                    s.type = 'text/javascript'; \
+                                    s.async = true; \
+                                    s.src = '//api.usersnap.com/load/" + api_key + ".js'; \
+                                    var x = document.getElementsByTagName('script')[0]; \
+                                    x.parentNode.insertBefore(s, x); \
+                                })();")
+                html.body.insert(0, script)
+
+                script = html.new_tag('script')
+                script['src'] = 'https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'
+                html.body.insert(0, script)
 
                 script = html.new_tag('script')
                 script.append('var just_scrolled = false;')
