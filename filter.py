@@ -20,6 +20,7 @@ COOKIE_FOLDER = 'data/cookies'
 CREDENTIALS_FILE = '../credentials/credentials.csv'
 
 SCRIPT_PATH = 'data/Scripts/'
+TEMPLATE_PATH = 'data/Templates/'
 
 class Filter:
 
@@ -170,11 +171,14 @@ class Filter:
                     script.append(myfile.read());
                 html.head.insert(0, script)
 
-                vn0 = html.findAll('a', {'id' : 'versionNum'}); 
-                for a in vn0:
-                    a.append("Ver: " + __version__);
-
                 vf0 = html.findAll('p1', {'id' : 'version-header0'});
+                if not vf0:
+                	with open(TEMPLATE_PATH+"versionBare.html", 'r') as myfile:
+                		bar = BeautifulSoup(myfile.read())
+                		vn0 = bar.findAll('a', {'id' : 'versionNum'}); 
+		                for a in vn0:
+		                    a.append("Ver: " + __version__);
+                		html.body.insert(0,bar)
                 for versionHeader in vf0:
                     versionHeader.append("Ver: " + __version__)
                     versionLink = html.new_tag('a', id='version-link', href=flow.request.url)
