@@ -104,14 +104,15 @@ class Filter:
             # Fill the website with credentials
             if isWpUrl:
                 name = url.rsplit(wpUrl + '/', 1)[1]
-                name = name.split('/')[1]
-                log, pwd =  Filter.getCredentials(name, CREDENTIALS_FILE)
-                for inputTag in html.findAll('input'):
-                    if inputTag and inputTag.has_attr('id'):
-                        if inputTag['id'] == 'user_login':
-                            inputTag['value'] = log
-                        if inputTag['id'] == 'user_pass':
-                            inputTag['value'] = pwd
+                if len(name) > 2:
+                    name = name.split('/')[1]
+                    log, pwd =  Filter.getCredentials(name, CREDENTIALS_FILE)
+                    for inputTag in html.findAll('input'):
+                        if inputTag and inputTag.has_attr('id'):
+                            if inputTag['id'] == 'user_login':
+                                inputTag['value'] = log
+                            if inputTag['id'] == 'user_pass':
+                                inputTag['value'] = pwd
 
             # Si ce n'est le site WP => c'est l'EPFL
             if not isWpUrl:
