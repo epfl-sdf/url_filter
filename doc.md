@@ -126,3 +126,7 @@ On effectue les modifications suivantes sur les 2 types de sites:
   alors que les sites Jahia ont une couleur spécifique a chaque site.
 * Comme nous ouvrons les sites dans des `iframe`s étroites, le mode responsif
   des sites est enlevé.
+* Le site envoi des informations a note console de comparaison (qui sera le parent
+  de la fenêtre ou la page est affiché dans notre console) concernant la taille
+  du site pour bien afficher les 2 `iframe` ainsi que l'URL de la page pour qu'elle
+  affiche dans une bare additionelle sur quel URL nous somme a ce moment.
