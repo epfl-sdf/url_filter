@@ -43,6 +43,21 @@ du fichier, il faut que ça soit explicitement `proxy.sh` pour lancer notre filt
 va s'arrêter et se relancer lui même. Il faut noter que c'est la quantité de RAM
 absolue sur le système et non seulement la RAM utilisé par notre programme.
 
+Pour que le filtre marche correctement, il faut un fichier spécial contenant des
+informations de connexion. La structure de dossier nécessaire pour que le filtre
+marche correctement est la suivante:
+```
+credentials
+└─ credentials.csv
+url_filter
+```
+Ou `url_filter` est le dossier de ce dépôt et `credentials.csv` est un fichier au
+format `.csv` dont les colonnes sont séparés par des virgules. Les colonnes
+nécessaires pour le bon fonctionnement du filtre:
+* La quatrième colonne doit être le titre du site
+* La sixième colonne doit être le nom de l'utilisateur pour se connecter au site
+* La septième colonne doit être le mot de passe pour se connecter au site
+
 ## Configuration du Proxy
 
 Cette commande lance un proxy web qui va filtrer les réponses aux requêtes qu'il
