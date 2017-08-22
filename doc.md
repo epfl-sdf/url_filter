@@ -27,12 +27,6 @@ Pour que cette commande marche, il faut être sous Ubuntu ou une autre
 distribution Linux utilisant `apt-get` comme gestionnaire de paquets et qui a les
 mêmes noms de packets que sur les dépôts Ubuntu.
 
-De plus, cet outil utilise des utilitaires communs sur les systèmes
-Linux mais qui peuvent ne pas être installés sur tous les ordinateurs.
-Ces outils sont:
-* `wget`
-* `curl`
-
 ## Lancer le parser
 Simplement avec la commande:
 ```
