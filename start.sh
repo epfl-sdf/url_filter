@@ -46,34 +46,38 @@ exit
 # lance le virtualenv
 source $virtFold/bin/activate 
 
-trap finish INT
+trap finish EXIT
 
-while [ 1 ];
-do 
-
-# Si mitmdump n'est pas lancé
-if ! pgrep $CMD_NAME > /dev/null
-then
-    $CMD &
-    PID=$(pgrep $CMD_NAME)
-    echo $CMD_NAME"  allumé"
-fi 
-
-sleep 1
-if ! pgrep $CMD_NAME > /dev/null 
-then
-    echo "Erreur: Mitmdump n'a pas pu être lancé"
-    break
-fi 
-MEM_USED=$(free -m | grep Mem | awk '{print $3}')
-#MEM_USED=$(($MEM_USED+0))
-# Si la mémoire max est dépassée
-if (( $MEM_USED > $MAX_RAM ))
-then
-    kill -9 $PID
-    wait $PID &> /dev/null
-    echo $CMD_NAME" arrété"  
-fi
-sleep 2
-done
+	while [ 1 ];
+	    do 
+	
+	    # Si mitmdump n'est pas lancé
+	    if ! pgrep $CMD_NAME > /dev/null
+	    then
+	        $CMD &
+	        PID=$(pgrep $CMD_NAME)
+	        echo $CMD_NAME"  allumé"
+	    fi 
+	
+	    sleep 1
+	    if ! pgrep $CMD_NAME > /dev/null 
+	    then
+	        echo "Erreur: Mitmdump n'a pas pu être lancé"
+	        break
+	    fi 
+	    MEM_USED=$(free -m | grep Mem | awk '{print $3}')
+	
+	    echo "------------------------------------------------------------------La mémoire est à "$MEM_USED
+	    echo "------------------------------------------------------------------Le PID est "$PID
+	
+	    #MEM_USED=$(($MEM_USED+0))
+	    # Si la mémoire max est dépassée
+	    if (( $MEM_USED > $MAX_RAM ))
+	    then
+	        kill -9 $PID
+	        wait $PID &> /dev/null
+	        echo $CMD_NAME" arrété"  
+	    fi
+	    sleep 2
+	done
 done

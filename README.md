@@ -14,6 +14,8 @@ Pour installer url_filter, il suffit de runner
 # Utilisation
 `/.start.sh proxy.sh ram_maximale`
 
+(on fait nous: bash -c "./start.sh proxy.sh 300" 2>> errors)
+
 Ce script va lancer le proxy. Le paramètre ram_maximale (en mégabyte) permet de stopper le proxy si la ram consommée par toutes la machine dépasse cette valeur. Il faut ensuite mettre l'adresse de la machine et le port 8080 dans les paramètres proxy du navigateur web. 
 
 Pour Firefox, il faut aller dans les paramètres avancés dans l'onglet "Réseau" puis les paramètres de la connexion. Dans la fenêtre qui s'ouvre, il faut choisir la configuration manuelle du proxy puis introduire l'adresse du proxy dans le champ "HTTP Proxy" et le port 8080 et cocher la case pour utiliser ce serveur proxy pour tous les protocoles puis appuyer sur OK.
